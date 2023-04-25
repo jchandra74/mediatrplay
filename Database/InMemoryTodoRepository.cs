@@ -1,13 +1,18 @@
+using Microsoft.Extensions.Logging;
+
 namespace MyTodos.Database;
 
 public class InMemoryTodoRepository : ITodoRepository
 {
-    private readonly Dictionary<Guid, Todo> _data;
     private static readonly object _lock = new Object();
+    
+    private readonly Dictionary<Guid, Todo> _data;
+    private readonly ILogger<InMemoryTodoRepository> _logger;
 
-    public InMemoryTodoRepository()
+    public InMemoryTodoRepository(ILogger<InMemoryTodoRepository> logger)
     {
         _data = new Dictionary<Guid, Todo>();
+        _logger = logger;
     }
 
     public Task CreateAsync(Todo todo, CancellationToken cancellationToken)
@@ -15,7 +20,7 @@ public class InMemoryTodoRepository : ITodoRepository
         lock(_lock)
         {
             _data[todo.Id] = todo;
-            Console.WriteLine($"Created Todo: {todo.Id}: {todo.Title}");
+            _logger.LogDebug("Created Todo: {todoId}: {todoTitle}", todo.Id, todo.Title);
         }
 
         return Task.CompletedTask;
@@ -23,7 +28,7 @@ public class InMemoryTodoRepository : ITodoRepository
 
     public Task<Todo> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Fetching Todo with id {id}...");
+        _logger.LogDebug("Fetching Todo with id: {todoId}", id);
         lock(_lock)
         {
             if (_data.ContainsKey(id)) return Task.FromResult(_data[id]);
