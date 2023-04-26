@@ -38,4 +38,17 @@ public sealed class TodoController
         else
             _logger.LogWarning("Unable to retrieve Todo with id: {id}", id);
     }
+
+    public async Task ShowAllTodos()
+    {
+        var todos = await _mediatr.Send(new GetAllTodosQuery());
+
+        if (todos != null)
+        {
+            foreach(var todo in todos)
+            {
+                _logger.LogInformation("{id}: {title} - {isDone}", todo.Id, todo.Title, todo.Completed ? "Done" : "Todo");
+            }
+        }
+    }
 }

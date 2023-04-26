@@ -36,4 +36,13 @@ public sealed class InMemoryTodoRepository : ITodoRepository
 
         throw new KeyNotFoundException(id.ToString());
     }
+
+    public Task<IEnumerable<Todo>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Fetching all Todos...");
+        lock(_lock)
+        {
+            return Task.FromResult(_data.Values.AsEnumerable());
+        }
+    }
 }
