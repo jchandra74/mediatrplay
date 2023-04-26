@@ -6,12 +6,11 @@ public sealed class InMemoryTodoRepository : ITodoRepository
 {
     private static readonly object _lock = new Object();
     
-    private readonly Dictionary<Guid, Todo> _data;
+    private readonly Dictionary<Guid, Todo> _data = new Dictionary<Guid, Todo>();
     private readonly ILogger<InMemoryTodoRepository> _logger;
 
     public InMemoryTodoRepository(ILogger<InMemoryTodoRepository> logger)
     {
-        _data = new Dictionary<Guid, Todo>();
         _logger = logger;
     }
 

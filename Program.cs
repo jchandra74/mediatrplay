@@ -31,6 +31,7 @@ Guid id = Guid.NewGuid();
 await controller.AddTodo("Figure out how he implemented the discriminated union", id);
 await controller.AddTodo("Go to bed.");
 await controller.ShowTodo(id);
+await controller.ShowTodo(Guid.NewGuid());
 await controller.ShowAllTodos();
 
 await host.StopAsync();
