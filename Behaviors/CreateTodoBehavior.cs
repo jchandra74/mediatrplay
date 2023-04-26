@@ -1,12 +1,14 @@
-using MediatR;
 using System.Diagnostics;
+
 using Microsoft.Extensions.Logging;
+
+using MediatR;
 
 using MyTodos.Validation;
 
 namespace MyTodos.Behaviors;
 
-public class CreateTodoBehavior : IPipelineBehavior<CreateTodoCommand, Result<Todo, ValidationFailed>>
+public sealed class CreateTodoBehavior : IPipelineBehavior<CreateTodoCommand, Result<Todo, ValidationFailed>>
 {
     private readonly ILogger<CreateTodoBehavior> _logger;
 

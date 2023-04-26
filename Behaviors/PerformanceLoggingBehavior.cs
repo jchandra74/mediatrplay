@@ -1,15 +1,17 @@
 using System.Diagnostics;
-using MediatR;
+
 using Microsoft.Extensions.Logging;
+
+using MediatR;
 
 namespace MyTodos.Behaviors;
 
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public sealed class PerformanceLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> _logger;
+    private readonly ILogger<PerformanceLoggingBehavior<TRequest, TResponse>> _logger;
 
-    public LoggingBehavior(ILogger<LoggingBehavior<TRequest,TResponse>> logger)
+    public PerformanceLoggingBehavior(ILogger<PerformanceLoggingBehavior<TRequest,TResponse>> logger)
     {
         _logger = logger;    
     }

@@ -3,9 +3,9 @@ using MyTodos.Database;
 
 namespace MyTodos;
 
-public record GetTodoQuery(Guid Id) : IRequest<Todo?>;
+public sealed record GetTodoQuery(Guid Id) : IRequest<Todo?>;
 
-public class GetTodoHandler : IRequestHandler<GetTodoQuery, Todo?>
+public sealed class GetTodoHandler : IRequestHandler<GetTodoQuery, Todo?>
 {
     private readonly ITodoRepository _todoRepository;
 

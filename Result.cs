@@ -42,4 +42,23 @@ public readonly struct Result<TValue,TError>
 
         throw new InvalidOperationException();
     }
+
+    public void Switch(
+        Action<TValue> a0,
+        Action<TError> a1)
+    {
+        if (!IsError && a0 != null)
+        {
+            a0(_value!);
+            return;
+        }
+
+        if (IsError && a1 != null)
+        {
+            a1(_error!);
+            return;
+        }
+
+        throw new InvalidOperationException();
+    }
 }

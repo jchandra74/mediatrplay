@@ -1,3 +1,3 @@
 namespace MyTodos;
 
-public record Todo(Guid Id, string Title);
+public sealed record Todo(Guid Id, string Title, bool Completed = false);

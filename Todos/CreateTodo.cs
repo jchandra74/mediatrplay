@@ -6,10 +6,10 @@ using MyTodos.Validation;
 
 namespace MyTodos;
 
-public record CreateTodoCommand(string Title) 
+public sealed record CreateTodoCommand(string Title, Guid Id = default) 
     : IRequest<Result<Todo, ValidationFailed>>;
 
-public class CreateTodoHandler : IRequestHandler<CreateTodoCommand, Result<Todo, ValidationFailed>>
+public sealed class CreateTodoHandler : IRequestHandler<CreateTodoCommand, Result<Todo, ValidationFailed>>
 {
     private readonly ITodoRepository _todoRepository;
     private readonly IValidator<Todo> _todoValidator;
@@ -23,7 +23,8 @@ public class CreateTodoHandler : IRequestHandler<CreateTodoCommand, Result<Todo,
     public async Task<Result<Todo, ValidationFailed>> Handle(
         CreateTodoCommand request, CancellationToken cancellationToken)
     {
-        var todo = new Todo(Guid.NewGuid(),request.Title);
+        var id = request.Id == default ? Guid.NewGuid() : request.Id;
+        var todo = new Todo(id, request.Title);
 
         var validationResult = await _todoValidator.ValidateAsync(todo);
 

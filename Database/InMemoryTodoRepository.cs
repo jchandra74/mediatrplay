@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MyTodos.Database;
 
-public class InMemoryTodoRepository : ITodoRepository
+public sealed class InMemoryTodoRepository : ITodoRepository
 {
     private static readonly object _lock = new Object();
     

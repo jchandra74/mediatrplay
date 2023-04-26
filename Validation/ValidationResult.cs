@@ -2,7 +2,7 @@ using FluentValidation.Results;
 
 namespace MyTodos.Validation;
 
-public class ValidationResult
+public sealed class ValidationResult
 {
     public bool IsValid { get; }
 
@@ -11,6 +11,6 @@ public class ValidationResult
     public ValidationResult(IEnumerable<ValidationFailure> errors)
     {
         Errors = errors ?? new List<ValidationFailure>();
-        IsValid = Errors.Any();        
+        IsValid = Errors.Any();
     }
 }

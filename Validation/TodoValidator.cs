@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace MyTodos.Validation;
 
-public class TodoCommandValidator : AbstractValidator<Todo>
+public sealed class TodoCommandValidator : AbstractValidator<Todo>
 {
     public TodoCommandValidator()
     {
