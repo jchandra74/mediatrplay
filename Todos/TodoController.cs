@@ -31,17 +31,12 @@ public sealed class TodoController
     public async Task ShowTodo(Guid id)
     {
         var query = new GetTodoQuery(id);
-        try
-        {
-            var result = await _mediatr.Send(query);
+        var result = await _mediatr.Send(query);
 
-        if (result != null) 
+        if (result != null)
             _logger.LogInformation("Retrieved Todo text is: {title}", result.Title);
-        }
-        catch(KeyNotFoundException)
-        {
+        else
             _logger.LogError("Unable to fetch Todo with id: {id}", id);
-        }
     }
 
     public async Task ShowAllTodos()
@@ -55,5 +50,19 @@ public sealed class TodoController
                 _logger.LogInformation("{id}: {title} - {isDone}", todo.Id, todo.Title, todo.Completed ? "Done" : "Pending");
             }
         }
+    }
+
+    public async Task UpdateTodo(Guid id, string title, bool completed)
+    {
+        var command = new UpdateTodoCommand(id, title, completed);
+        var result = await _mediatr.Send(command);
+
+        result.Switch(
+            todo => {  },
+            failure => {
+                var errors = failure.Errors.Select(f => f.ErrorMessage).Aggregate((c, n) => string.Join(' ', c, n));
+                _logger.LogError("Failures: {failures}", errors);
+            }
+        );
     }
 }

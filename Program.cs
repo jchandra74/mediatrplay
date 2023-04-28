@@ -7,6 +7,8 @@ using FluentValidation;
 using MyTodos;
 using MyTodos.Database;
 using MyTodos.Behaviors;
+using MediatR;
+using MyTodos.Validation;
 
 var builder = Host.CreateDefaultBuilder(Environment.GetCommandLineArgs())
     .ConfigureAppConfiguration((hostingContext, config) => {
@@ -16,9 +18,12 @@ var builder = Host.CreateDefaultBuilder(Environment.GetCommandLineArgs())
         services.AddSingleton<ITodoRepository, InMemoryTodoRepository>();
         services.AddSingleton<TodoController>();
         services.AddValidatorsFromAssemblyContaining<Program>(ServiceLifetime.Singleton);
-        services.AddMediatR(c => c.RegisterServicesFromAssemblyContaining<Program>()
-            //.AddBehavior<IPipelineBehavior<CreateTodoCommand, Result<Todo, ValidationFailed>>, CreateTodoBehavior>());
-            .AddOpenBehavior(typeof(PerformanceLoggingBehavior<,>)));
+        services.AddMediatR(c => 
+            c.RegisterServicesFromAssemblyContaining<Program>()
+                .AddOpenBehavior(typeof(PerformanceLoggingBehavior<,>))
+                .AddValidation<CreateTodoCommand, Todo>()
+                .AddValidation<UpdateTodoCommand, Todo?>()
+        );
     });
 
 var host = builder.Build();
@@ -31,8 +36,10 @@ Guid id = Guid.NewGuid();
 await controller.AddTodo("Figure out how he implemented the discriminated union", id);
 await controller.AddTodo("Go to bed.");
 await controller.ShowTodo(id);
-await controller.ShowTodo(Guid.NewGuid());
+await controller.ShowTodo(Guid.NewGuid());                      // This should fail
 await controller.ShowAllTodos();
+await controller.UpdateTodo(Guid.NewGuid(), "Whatever", true);  //This should fail
+await controller.UpdateTodo(id, "Figure out how he implemented the discriminated union", true);
 
 await host.StopAsync();
 

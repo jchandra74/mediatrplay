@@ -7,33 +7,48 @@ using MyTodos.Validation;
 namespace MyTodos;
 
 public sealed record CreateTodoCommand(string Title, Guid Id = default) 
-    : IRequest<Result<Todo, ValidationFailed>>;
+    : IValidatableRequest<Result<Todo, ValidationFailed>>;
 
 public sealed class CreateTodoHandler : IRequestHandler<CreateTodoCommand, Result<Todo, ValidationFailed>>
 {
     private readonly ITodoRepository _todoRepository;
-    private readonly IValidator<Todo> _todoValidator;
 
-    public CreateTodoHandler(ITodoRepository todoRepository, IValidator<Todo> todoValidator)
+    public CreateTodoHandler(ITodoRepository todoRepository)
     {
         _todoRepository = todoRepository;
-        _todoValidator = todoValidator;
     }
 
-    public async Task<Result<Todo, ValidationFailed>> Handle(
-        CreateTodoCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Todo, ValidationFailed>> Handle(CreateTodoCommand request, CancellationToken cancellationToken)
     {
         var id = request.Id == default ? Guid.NewGuid() : request.Id;
         var todo = new Todo(id, request.Title);
 
-        var validationResult = await _todoValidator.ValidateAsync(todo);
-
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.Errors);
-        }
-
         await _todoRepository.CreateAsync(todo);
         return todo;
+    }
+}
+
+public sealed class CreateTodoValidator : AbstractValidator<CreateTodoCommand>
+{
+    private readonly ITodoRepository _todoRepository;
+
+    public CreateTodoValidator(ITodoRepository todoRepository)
+    {
+        _todoRepository = todoRepository;
+
+        RuleFor(x => x.Id)
+            .MustAsync(NotHaveTodoWithSameId)
+            .WithName("Id")
+            .WithMessage("This todo already exists in the system");
+
+        RuleFor(x => x.Title).NotEmpty();
+    }
+
+    private async Task<bool> NotHaveTodoWithSameId(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var matchingTodo = await _todoRepository.GetByIdAsync(id, cancellationToken);
+        return matchingTodo is null;
     }
 }

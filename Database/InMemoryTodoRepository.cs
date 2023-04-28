@@ -14,7 +14,7 @@ public sealed class InMemoryTodoRepository : ITodoRepository
         _logger = logger;
     }
 
-    public Task CreateAsync(Todo todo, CancellationToken cancellationToken)
+    public Task<Todo> CreateAsync(Todo todo, CancellationToken cancellationToken)
     {
         lock(_lock)
         {
@@ -22,26 +22,34 @@ public sealed class InMemoryTodoRepository : ITodoRepository
             _logger.LogDebug("Created Todo: {todoId}: {todoTitle}", todo.Id, todo.Title);
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(todo);
     }
 
-    public Task<Todo> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public Task<Todo?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Fetching Todo with id: {todoId}", id);
         lock(_lock)
         {
-            if (_data.ContainsKey(id)) return Task.FromResult(_data[id]);
+            if (_data.ContainsKey(id)) return Task.FromResult((Todo?)_data[id]);
         }
-
-        throw new KeyNotFoundException(id.ToString());
+        return Task.FromResult(default(Todo));
     }
 
     public Task<IEnumerable<Todo>> GetAllAsync(CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Fetching all Todos...");
         lock(_lock)
         {
             return Task.FromResult(_data.Values.AsEnumerable());
+        }
+    }
+
+    public Task<Todo?> UpdateAsync(Todo todo, CancellationToken cancellationToken = default)
+    {
+        lock(_lock)
+        {
+            if (!_data.ContainsKey(todo.Id)) return Task.FromResult(default(Todo));
+            
+            _data[todo.Id] = todo;
+            return Task.FromResult((Todo?)todo);
         }
     }
 }
